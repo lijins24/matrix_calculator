@@ -59,21 +59,13 @@ class Matrix:
             print("Please make sure two matrices have same dimension!")
 
     def transpose(self, matrix1):
-        self.matrix = matrix1
-        #print(f"matrix[0][1]:{matrix2[0][1]}")
-        #if matrix1.dim == 2:
-            #print(matrix2[0][1])
-            #print(matrix2[1][0])
         tem = []
         for i in range(matrix1.dim):
             for j in range(matrix1.dim):
-                tem.append([i][j])
-            # tem = self.matrix[0][1]
-            # self.matrix[0][1] = self.matrix[1][0]
-            # self.matrix[1][0] = tem
-        #print(matrix2)
-        #elif matrix1.dim == 3:
-
+                tem=[[matrix1[j][i] for j in range(matrix1.dim)] for i in range(matrix1.dim)]
+        for k in range(len(tem)):
+            for l in range(len(tem)):
+                self.matrix[k][l] = tem[k][l]
         return self.matrix
 
     def multiplication(self, matrix1, matrix2):
@@ -83,6 +75,39 @@ class Matrix:
                     for k in range(self.dim):
                         self.matrix[i][j] += matrix1[i][k] * matrix2[k][j]
         return self.matrix
+
+    def inverse(self, matrix1):
+        if self.dim == 2:
+            a, b = matrix1[0]
+            c, d = matrix1[1]
+            determinant = (a * d) - (b * c)
+            if determinant == 0:
+                return None
+            else:
+                self.matrix = [[d, -b], [-c, a]]
+                base = 1 / determinant
+                self.matrix = [[base * i for i in row] for row in self.matrix]
+                return self.matrix
+        if self.dim == 3:
+            a, b, c = matrix1[0]
+            d, e, f = matrix1[1]
+            g, h, i = matrix1[2]
+
+            deter_plus = (a * e * i) + (b * f * g) + (c * d * h)
+            deter_minus = (c * e * g) + (b * d * i) + (a * f * h)
+            deter_3x3 = deter_plus - deter_minus
+            print(deter_3x3)
+            if deter_3x3 == 0:
+                return None
+            else:
+                self.matrix = [[(e * i - f * h), (c * h - b * i), (b * f - c * e)],
+                           [(f * g - d * i), (a * i - c * g), (c * d - a * f)],
+                           [(d * h - e * g), (g * b - a * h), (a * e - b * d)]]
+                base = 1 / deter_3x3
+                self.matrix = [[base * i for i in row] for row in self.matrix]
+                return self.matrix
+
+    #def reduced_row_echelon_form(self):
 
 def main():
     # 2x2 checking
@@ -107,18 +132,25 @@ def main():
     print("matrix1 - matrix2 = matrix4")
     print(matrix4)
 
-    print()
-    print("+"*10)
     matrix9 = Matrix(2,2)
     matrix9.transpose(matrix1)
+    print("transpose of matrix1 = matrix9")
     print(matrix9)
-    print("+" * 10)
-    print()
+
+    matrix11= Matrix(2,2)
+    matrix11.inverse(matrix1)
+    print("inverse of matrix1 = matrix11")
+    print(matrix11)
+
+    matrix13=Matrix(2,2)
+    matrix13.multiplication(matrix1,matrix2)
+    print("matrix1 * matrix2 = matrix13")
+    print(matrix13)
 
     # 3x3 checking
     matrix5 = Matrix(3, 3)
     print("matrix5 is")
-    matrix5.setdata([[1, 2,3], [3, 4,5],[5,6,7]])
+    matrix5.setdata([[1, 2,3], [2, 3,4],[2,2,1]])
     print(matrix5)
 
     print("matrix6 is")
@@ -135,6 +167,25 @@ def main():
     matrix8.subtraction(matrix5, matrix6)
     print("matrix5 - matrix6 = matrix8")
     print(matrix8)
+
+    print()
+    print("+" * 10)
+    matrix10 = Matrix(3, 3)
+    matrix10.transpose(matrix5)
+    print(matrix10)
+    print("+" * 10)
+    print()
+
+    matrix12 = Matrix(3, 3)
+    matrix12.inverse(matrix5)
+    print("inverse of matrix5 = matrix12")
+    print(matrix12)
+
+    matrix14 = Matrix(3, 3)
+    matrix14.multiplication(matrix5, matrix6)
+    print("matrix5 * matrix6 = matrix14")
+    print(matrix14)
+
 
 
 main()
