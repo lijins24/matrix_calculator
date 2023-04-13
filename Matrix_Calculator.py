@@ -84,7 +84,6 @@ class Matrix:
             deter_plus = (a * e * i) + (b * f * g) + (c * d * h)
             deter_minus = (c * e * g) + (b * d * i) + (a * f * h)
             deter_3x3 = deter_plus - deter_minus
-            print(deter_3x3)
             if deter_3x3 == 0:
                 return None
             else:
@@ -120,17 +119,41 @@ class Matrix:
             else:
                 return 0
 
+    def positive_definite(self):
+        if self.dim == 2:
+            det = self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]
+            if self.matrix[0][0] > 0 and det > 0:
+                return True
+            else:
+                return False
+        elif self.dim == 3:
+            det = self.matrix[0][0] * (self.matrix[1][1] * self.matrix[2][2] - self.matrix[1][2] * self.matrix[2][1]) \
+                  - self.matrix[0][1] * (self.matrix[1][0] * self.matrix[2][2] - self.matrix[1][2] * self.matrix[2][0]) \
+                  + self.matrix[0][2] * (self.matrix[1][0] * self.matrix[2][1] - self.matrix[1][1] * self.matrix[2][0])
+            if self.matrix[0][0] < 0:
+                return False
+            else:
+                if self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0] < 0:
+                    return False
+                elif det < 0:
+                    return False
+                elif self.matrix[0][0] > 0 and self.matrix[1][1] > 0 and self.matrix[2][2] > 0 \
+                        and self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0] > 0 \
+                        and (self.matrix[0][0], self.matrix[0][1], self.matrix[1][0], self.matrix[1][1]) > (0,0,0,0):
+                    return True
+                else:
+                    return False
+
     def helper_row_addition(self, row1, row2):
         if 0 <= row1 < self.dim and 0 <= row2 < self.dim:
             for i in range(self.dim):
                 self.matrix[row2][i] = self.matrix[row1][i] + self.matrix[row2][i]
-            print(self.matrix)
             return self.matrix
         else:
             print("Error! Please enter an existing row index!")
             raise IndexError
 
-    def helper_change_row(self, row1, row2):
+    def helper_row_change(self, row1, row2):
         if row1 < 0 or row2 < 0 or row1 > self.dim or row2 > self.dim:
             print("Error! Please enter an existing row index!")
             raise IndexError
@@ -150,13 +173,15 @@ def main():
 
     print("matrix2 is")
     matrix2 = Matrix(2, 2)
-    matrix2.setdata([[2, 3], [4, 5]])
+    matrix2.setdata([[2, -1], [-1, 2]])
     print(matrix2)
 
-    # matrix3 = Matrix(2,2)
-    # matrix3.addition(matrix1, matrix2)
-    # print("matrix1 + matrix2 = matrix3")
-    # print(matrix3)
+    matrix3 = Matrix(2,2)
+    matrix3.addition(matrix1, matrix2)
+    print("matrix1 + matrix2 = matrix3")
+    print(matrix3)
+
+    print(matrix2.positive_definite())
     #
     # matrix4 = Matrix(2, 2)
     # matrix4.subtraction(matrix1, matrix2)
@@ -179,20 +204,22 @@ def main():
     # print(matrix13)
 
     # matrix3 = Matrix(2,2)
-    print(matrix2.rank_2x2())
+
 
     # 3x3 checking
-    matrix5 = Matrix(3, 3)
-    print("matrix5 is")
-    matrix5.setdata([[1, 2, 3], [2, 3, 4], [2, 2, 1]])
-    print(matrix5)
+    # matrix5 = Matrix(3, 3)
+    # print("matrix5 is")
+    # matrix5.setdata([[1, 2, 3], [2, 3, 4], [2, 2, 1]])
+    # print(matrix5)
+    #
+    # print("matrix6 is")
+    # matrix6 = Matrix(3, 3)
+    # matrix6.setdata([[2, -1, 0], [-1, 2, -1], [0, -1, 2]])
+    # print(matrix6)
+    # print()
+    # print(matrix5.positive_definite())
 
-    print("matrix6 is")
-    matrix6 = Matrix(3, 3)
-    matrix6.setdata([[2, 3, 4], [4, 5, 6], [6, 7, 8]])
-    print(matrix6)
-    print()
-    print(matrix5.rank_2x2())
+    #print(matrix5.rank_2x2())
     # matrix7 = Matrix(3, 3)
     # matrix7.addition(matrix5, matrix6)
     # print("matrix5 + matrix6 = matrix7")
