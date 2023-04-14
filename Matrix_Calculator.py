@@ -13,6 +13,7 @@ class Matrix:
             raise ValueError
         for _ in range(self.rows):
             self.matrix.append([0] * self.columns)
+        self.pivot_variable = [None, None, None]
 
     def __getitem__(self, i):
         return self.matrix[i]
@@ -139,49 +140,98 @@ class Matrix:
                     return False
                 elif self.matrix[0][0] > 0 and self.matrix[1][1] > 0 and self.matrix[2][2] > 0 \
                         and self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0] > 0 \
-                        and (self.matrix[0][0], self.matrix[0][1], self.matrix[1][0], self.matrix[1][1]) > (0,0,0,0):
+                        and (self.matrix[0][0], self.matrix[0][1], self.matrix[1][0], self.matrix[1][1]) > (0, 0, 0, 0):
                     return True
                 else:
                     return False
 
-    def helper_row_addition(self, row1, row2):
-        if 0 <= row1 < self.dim and 0 <= row2 < self.dim:
-            for i in range(self.dim):
-                self.matrix[row2][i] = self.matrix[row1][i] + self.matrix[row2][i]
-            return self.matrix
-        else:
-            print("Error! Please enter an existing row index!")
-            raise IndexError
-
-    def helper_row_change(self, row1, row2):
+    def helper_row_exchange(self, row1, row2):
         if row1 < 0 or row2 < 0 or row1 > self.dim or row2 > self.dim:
             print("Error! Please enter an existing row index!")
             raise IndexError
         else:
-            temp = self.matrix[row1 - 1]
-            self.matrix[row1 - 1] = self.matrix[row2 - 1]
-            self.matrix[row2 - 1] = temp
+            temp = self.matrix[row1]
+            self.matrix[row1] = self.matrix[row2]
+            self.matrix[row2] = temp
         return self.matrix
+
+    def row_echelon(self):
+        if self.dim == 3:
+            if self.matrix[0][0] == 0 and self.matrix[1][0] != 0 and self.matrix[2][0] != 0:
+                self.helper_row_exchange(0, 1)
+            elif self.matrix[0][0] == 0 and self.matrix[1][0] == 0 and self.matrix[2][0] != 0:
+                self.helper_row_exchange(0, 2)
+            if self.matrix[1][0] != 0:
+                x = self.matrix[1][0] / self.matrix[0][0]
+                tem = [self.matrix[0][i] * x for i in range(len(self.matrix[0]))]
+                for j in range(len(self.matrix[0])):
+                    self.matrix[1][j] -= tem[j]
+
+            if self.matrix[1][0] == 0 and self.matrix[2][0] != 0:
+                x = self.matrix[2][0] / self.matrix[0][0]
+                tem = [self.matrix[0][i] * x for i in range(len(self.matrix[0]))]
+                for j in range(len(self.matrix[0])):
+                    self.matrix[2][j] -= tem[j]
+
+            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] == 0:
+                self.helper_row_exchange(1, 2)
+
+            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] != 0 and self.matrix[2][1] != 0:
+                x = self.matrix[2][1] / self.matrix[1][1]
+                # print(x)
+                tem = [self.matrix[1][i] * x for i in range(len(self.matrix[0]))]
+                for j in range(len(self.matrix[0])):
+                    self.matrix[2][j] -= tem[j]
+
+            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] == 0 and self.matrix[2][
+                1] == 0 and self.matrix[1][2] == 0 and self.matrix[2][2] != 0:
+                self.helper_row_exchange(1, 2)
+            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] == 0 and self.matrix[2][
+                1] == 0 and self.matrix[1][2] != 0 and self.matrix[2][2] != 0:
+
+                x = self.matrix[2][2] / self.matrix[1][2]
+                tem = [self.matrix[1][i] * x for i in range(len(self.matrix[0]))]
+                for j in range(len(self.matrix[0])):
+                    self.matrix[2][j] -= tem[j]
+
+            if self.matrix[0][0] != 0 and self.matrix[1][1] != 0 and self.matrix[2][2] != 0:
+                for k in range(len(self.pivot_variable)):
+                    self.pivot_variable[k] = self.matrix[k][k]
+            elif self.matrix[0][0] != 0 and self.matrix[1][1] != 0 and self.matrix[2][2] == 0:
+                for k in range(len(self.pivot_variable) - 1):
+                    self.pivot_variable[k] = self.matrix[k][k]
+            elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0 and self.matrix[1][2] != 0:
+                self.pivot_variable[0] = self.matrix[0][0]
+                self.pivot_variable[1] = self.matrix[1][2]
+            elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0 and self.matrix[2][2] == 0:
+                for k in range(len(self.pivot_variable) - 2):
+                    self.pivot_variable[k] = self.matrix[k][k]
+
+            return self.matrix
+
+    def pivot_variable(self):
+        self.row_echelon()
+        return self.pivot_variable
 
 
 def main():
     # 2x2 checking
-    matrix1 = Matrix(2, 2)
-    print("matrix1 is")
-    matrix1.setdata([[1, 2], [3, 4]])
-    print(matrix1)
-
-    print("matrix2 is")
-    matrix2 = Matrix(2, 2)
-    matrix2.setdata([[2, -1], [-1, 2]])
-    print(matrix2)
-
-    matrix3 = Matrix(2,2)
-    matrix3.addition(matrix1, matrix2)
-    print("matrix1 + matrix2 = matrix3")
-    print(matrix3)
-
-    print(matrix2.positive_definite())
+    # matrix1 = Matrix(2, 2)
+    # print("matrix1 is")
+    # matrix1.setdata([[1, 2], [3, 4]])
+    # print(matrix1)
+    #
+    # print("matrix2 is")
+    # matrix2 = Matrix(2, 2)
+    # matrix2.setdata([[2, -1], [-1, 2]])
+    # print(matrix2)
+    #
+    # matrix3 = Matrix(2,2)
+    # matrix3.addition(matrix1, matrix2)
+    # print("matrix1 + matrix2 = matrix3")
+    # print(matrix3)
+    #
+    # print(matrix2.positive_definite())
     #
     # matrix4 = Matrix(2, 2)
     # matrix4.subtraction(matrix1, matrix2)
@@ -205,7 +255,6 @@ def main():
 
     # matrix3 = Matrix(2,2)
 
-
     # 3x3 checking
     # matrix5 = Matrix(3, 3)
     # print("matrix5 is")
@@ -219,7 +268,7 @@ def main():
     # print()
     # print(matrix5.positive_definite())
 
-    #print(matrix5.rank_2x2())
+    # print(matrix5.rank_2x2())
     # matrix7 = Matrix(3, 3)
     # matrix7.addition(matrix5, matrix6)
     # print("matrix5 + matrix6 = matrix7")
@@ -253,6 +302,13 @@ def main():
     # matrix15.helper_row_addition(0,3)
     # print("matrix15:")
     # print(matrix15)
+
+    matrix100 = Matrix(3, 3)
+    matrix100.setdata([[100, 4, 4], [50, 1, 1], [50, 2, 2]])
+    print(f"original matrix:\n {matrix100}\n")
+    matrix100.row_echelon()
+    print(f"reduced matrix:\n {matrix100}")
+    print(matrix100.pivot_variable)
 
 
 main()
