@@ -178,7 +178,6 @@ class Matrix:
 
             if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] != 0 and self.matrix[2][1] != 0:
                 x = self.matrix[2][1] / self.matrix[1][1]
-                # print(x)
                 tem = [self.matrix[1][i] * x for i in range(len(self.matrix[0]))]
                 for j in range(len(self.matrix[0])):
                     self.matrix[2][j] -= tem[j]
