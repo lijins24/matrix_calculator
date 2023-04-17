@@ -13,7 +13,8 @@ class Matrix:
             raise ValueError
         for _ in range(self.rows):
             self.matrix.append([0] * self.columns)
-        self.pivot_variable = [None, None, None]
+        self.pivot_variable3x3 = [None, None, None]
+        self.pivot_variable2x2 = [None, None]
 
     def __getitem__(self, i):
         return self.matrix[i]
@@ -22,6 +23,7 @@ class Matrix:
         return '\n'.join(' | '.join(map(str, rows)) for rows in self.matrix)
 
     def setdata(self, data):
+        print(self.dim)
         if self.dim == len(data[0]):
             for i in range(self.rows):
                 for j in range(self.columns):
@@ -194,23 +196,45 @@ class Matrix:
                     self.matrix[2][j] -= tem[j]
 
             if self.matrix[0][0] != 0 and self.matrix[1][1] != 0 and self.matrix[2][2] != 0:
-                for k in range(len(self.pivot_variable)):
-                    self.pivot_variable[k] = self.matrix[k][k]
+                for k in range(len(self.pivot_variable3x3)):
+                    self.pivot_variable3x3[k] = self.matrix[k][k]
             elif self.matrix[0][0] != 0 and self.matrix[1][1] != 0 and self.matrix[2][2] == 0:
-                for k in range(len(self.pivot_variable) - 1):
-                    self.pivot_variable[k] = self.matrix[k][k]
+                for k in range(len(self.pivot_variable3x3) - 1):
+                    self.pivot_variable3x3[k] = self.matrix[k][k]
             elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0 and self.matrix[1][2] != 0:
-                self.pivot_variable[0] = self.matrix[0][0]
-                self.pivot_variable[1] = self.matrix[1][2]
+                self.pivot_variable3x3[0] = self.matrix[0][0]
+                self.pivot_variable3x3[1] = self.matrix[1][2]
             elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0 and self.matrix[2][2] == 0:
-                for k in range(len(self.pivot_variable) - 2):
-                    self.pivot_variable[k] = self.matrix[k][k]
+                for k in range(len(self.pivot_variable3x3) - 2):
+                    self.pivot_variable3x3[k] = self.matrix[k][k]
+            return self.matrix
 
+        if self.dim == 2:
+            if self.matrix[0][0] == 0 and self.matrix[1][0] != 0:
+                self.helper_row_exchange(0, 1)
+            elif self.matrix[0][0] == 0 and self.matrix[1][0] == 0:
+                self.helper_row_exchange(0, 1)
+
+            if self.matrix[1][0] != 0:
+                x = self.matrix[1][0] / self.matrix[0][0]
+                tem = [self.matrix[0][i] * x for i in range(len(self.matrix[0]))]
+                for j in range(len(self.matrix[0])):
+                    self.matrix[1][j] -= tem[j]
+
+            if self.matrix[0][0] != 0 and self.matrix[1][1] != 0:
+                for k in range(len(self.pivot_variable2x2)):
+                    self.pivot_variable2x2[k] = self.matrix[k][k]
+            elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0:
+                for k in range(len(self.pivot_variable2x2) - 1):
+                    self.pivot_variable2x2[k] = self.matrix[k][k]
             return self.matrix
 
     def pivot_variable(self):
         self.row_echelon()
-        return self.pivot_variable
+        if self.dim == 3:
+            return self.pivot_variable3x3
+        if self.dim == 2:
+            return self.pivot_variable2x2
 
 
 def main():
@@ -301,13 +325,20 @@ def main():
     # matrix15.helper_row_addition(0,3)
     # print("matrix15:")
     # print(matrix15)
+    matrix101 = Matrix(3, 3)
+    matrix101.setdata([[1, 4,4], [1, 1,10],[4,2,5]])
+    print(f"original matrix:\n {matrix101}\n")
+    matrix101.row_echelon()
+    print(f"reduced matrix:\n {matrix101}")
+    print(matrix101.pivot_variable)
 
-    matrix100 = Matrix(3, 3)
-    matrix100.setdata([[100, 4, 4], [50, 1, 1], [50, 2, 2]])
+
+    matrix100 = Matrix(2, 2)
+    matrix100.setdata([[50, 1], [50, 1]])
     print(f"original matrix:\n {matrix100}\n")
     matrix100.row_echelon()
     print(f"reduced matrix:\n {matrix100}")
-    print(matrix100.pivot_variable)
+    print(f"pivot variables: {matrix100.pivot_variable()}")
 
 
 main()
