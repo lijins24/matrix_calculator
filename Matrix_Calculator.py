@@ -13,8 +13,10 @@ class Matrix:
             raise ValueError
         for _ in range(self.rows):
             self.matrix.append([0] * self.columns)
-        self.pivot_variable3x3 = [None, None, None]
-        self.pivot_variable2x2 = [None, None]
+        if self.dim == 3:
+            self.pivot_variable = [None, None, None]
+        if self.dim == 2:
+            self.pivot_variable = [None, None]
 
     def __getitem__(self, i):
         return self.matrix[i]
@@ -147,198 +149,188 @@ class Matrix:
                 else:
                     return False
 
-    def helper_row_exchange(self, row1, row2):
-        if row1 < 0 or row2 < 0 or row1 > self.dim or row2 > self.dim:
+    def helper_add_multiply(self, row1, row2, multiple=1.0):
+        if row1 <= 0 or row2 <= 0 or row1 > self.dim or row2 > self.dim:
             print("Error! Please enter an existing row index!")
             raise IndexError
         else:
-            temp = self.matrix[row1]
-            self.matrix[row1] = self.matrix[row2]
-            self.matrix[row2] = temp
+            for i in range(self.dim):
+                self.matrix[row2 - 1][i] += multiple * self.matrix[row1 - 1][i]
+
+    def helper_row_exchange(self, row1, row2):
+        if row1 <= 0 or row2 <= 0 or row1 > self.dim or row2 > self.dim:
+            print("Error! Please enter an existing row index!")
+            raise IndexError
+        else:
+            temp = self.matrix[row1 - 1]
+            self.matrix[row1 - 1] = self.matrix[row2 - 1]
+            self.matrix[row2 - 1] = temp
         return self.matrix
 
     def row_echelon(self):
         if self.dim == 3:
-            if self.matrix[0][0] == 0 and self.matrix[1][0] != 0 and self.matrix[2][0] != 0:
-                self.helper_row_exchange(0, 1)
-            elif self.matrix[0][0] == 0 and self.matrix[1][0] == 0 and self.matrix[2][0] != 0:
-                self.helper_row_exchange(0, 2)
-            if self.matrix[1][0] != 0:
-                x = self.matrix[1][0] / self.matrix[0][0]
-                tem = [self.matrix[0][i] * x for i in range(len(self.matrix[0]))]
-                for j in range(len(self.matrix[0])):
-                    self.matrix[1][j] -= tem[j]
+            if self.matrix[0][0] == 0 and self.matrix[1][0] == 0 and self.matrix[2][0] == 0:
+                print("This is a 3x2 matrix! Please enter a 3x3 matrix!")
+                raise ValueError
+            elif self.matrix[0][1] == 0 and self.matrix[1][1] == 0 and self.matrix[2][1] == 0:
+                print("This is a 3x2 matrix! Please enter a 3x3 matrix!")
+                raise ValueError
+            elif self.matrix[0][2] == 0 and self.matrix[1][2] == 0 and self.matrix[2][2] == 0:
+                print("This is a 3x2 matrix! Please enter a 3x3 matrix!")
+                raise ValueError
+            elif self.matrix[0][0] == 0 and self.matrix[0][1] == 0 and self.matrix[0][2] == 0:
+                print("This is a 2x3 matrix! Please enter a 3x3 matrix!")
+                raise ValueError
+            elif self.matrix[1][0] == 0 and self.matrix[1][1] == 0 and self.matrix[1][2] == 0:
+                print("This is a 2x3 matrix! Please enter a 3x3 matrix!")
+                raise ValueError
+            elif self.matrix[2][0] == 0 and self.matrix[2][1] == 0 and self.matrix[2][2] == 0:
+                print("This is a 2x3 matrix! Please enter a 3x3 matrix!")
+                raise ValueError
 
-            if self.matrix[1][0] == 0 and self.matrix[2][0] != 0:
-                x = self.matrix[2][0] / self.matrix[0][0]
-                tem = [self.matrix[0][i] * x for i in range(len(self.matrix[0]))]
-                for j in range(len(self.matrix[0])):
-                    self.matrix[2][j] -= tem[j]
+            if self.matrix[0][0] == 0:
+                if self.matrix[1][0] == 0:
+                    self.helper_row_exchange(1, 3)
+                    if self.matrix[1][1] == 0:
+                        if self.matrix[2][1] == 0:
+                            self.helper_add_multiply(2, 3, -(self.matrix[2][2] / self.matrix[1][2]))
+                            self.pivot_variable[0] = self.matrix[0][0]
+                            self.pivot_variable[1] = self.matrix[1][2]
+                        else:
+                            self.helper_row_exchange(2, 3)
+                            self.pivot_variable[0] = self.matrix[0][0]
+                            self.pivot_variable[1] = self.matrix[1][1]
+                            self.pivot_variable[2] = self.matrix[2][2]
+                    else:
+                        if self.matrix[2][1] == 0:
+                            self.pivot_variable[0] = self.matrix[0][0]
+                            self.pivot_variable[1] = self.matrix[1][1]
+                            self.pivot_variable[2] = self.matrix[2][2]
+                        else:
+                            self.helper_add_multiply(2, 3, -(self.matrix[2][1] / self.matrix[1][1]))
+                            if self.matrix[2][2] != 0:
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                                self.pivot_variable[2] = self.matrix[2][2]
+                            else:
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][2]
+                else:
+                    self.helper_row_exchange(1, 2)
+                    if self.matrix[2][0] == 0:
+                        if self.matrix[1][1] == 0:
+                            if self.matrix[2][1] == 0:
+                                self.helper_add_multiply(2, 3, -(self.matrix[2][2] / self.matrix[1][2]))
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][2]
+                            else:
+                                self.helper_row_exchange(2, 3)
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                                self.pivot_variable[2] = self.matrix[2][2]
+                        else:
+                            if self.matrix[2][1] == 0:
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                                self.pivot_variable[2] = self.matrix[2][2]
+                            else:
+                                self.helper_add_multiply(2, 3, -(self.matrix[2][1] / self.matrix[1][1]))
+                                if self.matrix[2][2] != 0:
+                                    self.pivot_variable[0] = self.matrix[0][0]
+                                    self.pivot_variable[1] = self.matrix[1][1]
+                                    self.pivot_variable[2] = self.matrix[2][2]
+                                else:
+                                    self.pivot_variable[0] = self.matrix[0][0]
+                                    self.pivot_variable[1] = self.matrix[1][2]
+            else:
+                if self.matrix[1][0] == 0:
+                    if self.matrix[2][0] == 0:
+                        if self.matrix[1][1] == 0:
+                            if self.matrix[2][1] == 0:
+                                self.helper_add_multiply(2, 3, -(self.matrix[2][2] / self.matrix[1][2]))
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][2]
+                            else:
+                                self.helper_row_exchange(2, 3)
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                                self.pivot_variable[2] = self.matrix[2][2]
+                        else:
+                            if self.matrix[2][1] == 0:
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                                self.pivot_variable[2] = self.matrix[2][2]
+                            else:
+                                self.helper_add_multiply(2, 3, -(self.matrix[2][1] / self.matrix[1][1]))
+                                if self.matrix[2][2] != 0:
+                                    self.pivot_variable[0] = self.matrix[0][0]
+                                    self.pivot_variable[1] = self.matrix[1][1]
+                                    self.pivot_variable[2] = self.matrix[2][2]
+                                else:
+                                    self.pivot_variable[0] = self.matrix[0][0]
+                                    self.pivot_variable[1] = self.matrix[1][2]
+                    else:
+                        self.helper_add_multiply(1, 3, -(self.matrix[2][0] / self.matrix[0][0]))
+                        if self.matrix[2][1] == 0:
+                            self.pivot_variable[0] = self.matrix[0][0]
+                            self.pivot_variable[1] = self.matrix[1][1]
+                            self.pivot_variable[2] = self.matrix[2][2]
+                        else:
+                            self.helper_add_multiply(2, 3, -(self.matrix[2][1] / self.matrix[1][1]))
+                            if self.matrix[2][2] == 0:
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                            else:
+                                self.pivot_variable[0] = self.matrix[0][0]
+                                self.pivot_variable[1] = self.matrix[1][1]
+                                self.pivot_variable[2] = self.matrix[2][2]
 
-            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] == 0:
-                self.helper_row_exchange(1, 2)
+        elif self.dim == 2:
+            if self.matrix[0][0] == 0:
+                if self.matrix[0][1] == 0:
+                    if self.matrix[1][0] != 0:
+                        pivot_one = self.matrix[1][0]
+                        self.helper_row_exchange(1, 2)
+                        self.pivot_variable = [pivot_one, None]
+                        return self.matrix
+                    elif self.matrix[1][0] == 0:
+                        if self.matrix[1][1] == 0:
+                            self.pivot_variable = [None, None]
+                            return self.matrix
+                        else:
+                            pivot_one = self.matrix[1][1]
+                            self.helper_row_exchange(1, 2)
+                            self.pivot_variable = [pivot_one, None]
+                            return self.matrix
+                else:
+                    if self.matrix[1][0] == 0:
+                        # [[0,1],[0,?]]
+                        pivot_one = self.matrix[0][1]
+                        pivot_two = None
+                        self.matrix[1][1] = 0
+                        self.matrix[1][0] = 0
+                        self.pivot_variable = [pivot_one, pivot_two]
+                        return self.matrix
+                    else:
+                        self.helper_row_exchange(1, 2)
+                        pivot_one = self.matrix[0][0]
+                        pivot_two = self.matrix[1][1]
+                        self.pivot_variable = [pivot_one, pivot_two]
+                        return self.matrix
+            else:
+                if self.matrix[1][0] == 0:
+                    pivot_one = self.matrix[0][0]
+                    if self.matrix[1][1] == 0:
+                        pivot_two = None
+                    else:
+                        pivot_two = self.matrix[1][1]
+                    self.pivot_variable = [pivot_one, pivot_two]
+                else:
+                    self.helper_add_multiply(1, 2, -(self.matrix[1][0] / self.matrix[0][0]))
+                    pivot_one = self.matrix[0][0]
+                    if self.matrix[1][1] == 0:
+                        pivot_two = None
+                    else:
+                        pivot_two = self.matrix[1][1]
+                    self.pivot_variable = [pivot_one, pivot_two]
 
-            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] != 0 and self.matrix[2][1] != 0:
-                x = self.matrix[2][1] / self.matrix[1][1]
-                tem = [self.matrix[1][i] * x for i in range(len(self.matrix[0]))]
-                for j in range(len(self.matrix[0])):
-                    self.matrix[2][j] -= tem[j]
-
-            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] == 0 and self.matrix[2][
-                1] == 0 and self.matrix[1][2] == 0 and self.matrix[2][2] != 0:
-                self.helper_row_exchange(1, 2)
-            if self.matrix[1][0] == 0 and self.matrix[2][0] == 0 and self.matrix[1][1] == 0 and self.matrix[2][
-                1] == 0 and self.matrix[1][2] != 0 and self.matrix[2][2] != 0:
-
-                x = self.matrix[2][2] / self.matrix[1][2]
-                tem = [self.matrix[1][i] * x for i in range(len(self.matrix[0]))]
-                for j in range(len(self.matrix[0])):
-                    self.matrix[2][j] -= tem[j]
-
-            if self.matrix[0][0] != 0 and self.matrix[1][1] != 0 and self.matrix[2][2] != 0:
-                for k in range(len(self.pivot_variable3x3)):
-                    self.pivot_variable3x3[k] = self.matrix[k][k]
-            elif self.matrix[0][0] != 0 and self.matrix[1][1] != 0 and self.matrix[2][2] == 0:
-                for k in range(len(self.pivot_variable3x3) - 1):
-                    self.pivot_variable3x3[k] = self.matrix[k][k]
-            elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0 and self.matrix[1][2] != 0:
-                self.pivot_variable3x3[0] = self.matrix[0][0]
-                self.pivot_variable3x3[1] = self.matrix[1][2]
-            elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0 and self.matrix[2][2] == 0:
-                for k in range(len(self.pivot_variable3x3) - 2):
-                    self.pivot_variable3x3[k] = self.matrix[k][k]
-            return self.matrix
-
-        if self.dim == 2:
-            if self.matrix[0][0] == 0 and self.matrix[1][0] != 0:
-                self.helper_row_exchange(0, 1)
-            elif self.matrix[0][0] == 0 and self.matrix[1][0] == 0:
-                self.helper_row_exchange(0, 1)
-
-            if self.matrix[1][0] != 0:
-                x = self.matrix[1][0] / self.matrix[0][0]
-                tem = [self.matrix[0][i] * x for i in range(len(self.matrix[0]))]
-                for j in range(len(self.matrix[0])):
-                    self.matrix[1][j] -= tem[j]
-
-            if self.matrix[0][0] != 0 and self.matrix[1][1] != 0:
-                for k in range(len(self.pivot_variable2x2)):
-                    self.pivot_variable2x2[k] = self.matrix[k][k]
-            elif self.matrix[0][0] != 0 and self.matrix[1][1] == 0:
-                for k in range(len(self.pivot_variable2x2) - 1):
-                    self.pivot_variable2x2[k] = self.matrix[k][k]
-            return self.matrix
-
-    def pivot_variable(self):
-        self.row_echelon()
-        if self.dim == 3:
-            return self.pivot_variable3x3
-        if self.dim == 2:
-            return self.pivot_variable2x2
-
-
-def main():
-    # 2x2 checking
-    # matrix1 = Matrix(2, 2)
-    # print("matrix1 is")
-    # matrix1.setdata([[1, 2], [3, 4]])
-    # print(matrix1)
-    #
-    # print("matrix2 is")
-    # matrix2 = Matrix(2, 2)
-    # matrix2.setdata([[2, -1], [-1, 2]])
-    # print(matrix2)
-    #
-    # matrix3 = Matrix(2,2)
-    # matrix3.addition(matrix1, matrix2)
-    # print("matrix1 + matrix2 = matrix3")
-    # print(matrix3)
-    #
-    # print(matrix2.positive_definite())
-    #
-    # matrix4 = Matrix(2, 2)
-    # matrix4.subtraction(matrix1, matrix2)
-    # print("matrix1 - matrix2 = matrix4")
-    # print(matrix4)
-    #
-    # matrix9 = Matrix(2,2)
-    # matrix9.transpose(matrix1)
-    # print("transpose of matrix1 = matrix9")
-    # print(matrix9)
-    #
-    # matrix11= Matrix(2,2)
-    # matrix11.inverse(matrix1)
-    # print("inverse of matrix1 = matrix11")
-    # print(matrix11)
-    #
-    # matrix13=Matrix(2,2)
-    # matrix13.multiplication(matrix1,matrix2)
-    # print("matrix1 * matrix2 = matrix13")
-    # print(matrix13)
-
-    # matrix3 = Matrix(2,2)
-
-    # 3x3 checking
-    # matrix5 = Matrix(3, 3)
-    # print("matrix5 is")
-    # matrix5.setdata([[1, 2, 3], [2, 3, 4], [2, 2, 1]])
-    # print(matrix5)
-    #
-    # print("matrix6 is")
-    # matrix6 = Matrix(3, 3)
-    # matrix6.setdata([[2, -1, 0], [-1, 2, -1], [0, -1, 2]])
-    # print(matrix6)
-    # print()
-    # print(matrix5.positive_definite())
-
-    # print(matrix5.rank_2x2())
-    # matrix7 = Matrix(3, 3)
-    # matrix7.addition(matrix5, matrix6)
-    # print("matrix5 + matrix6 = matrix7")
-    # print(matrix7)
-    #
-    # matrix8 = Matrix(3, 3)
-    # matrix8.subtraction(matrix5, matrix6)
-    # print("matrix5 - matrix6 = matrix8")
-    # print(matrix8)
-    #
-    # print()
-    # print("+" * 10)
-    # matrix10 = Matrix(3, 3)
-    # matrix10.transpose(matrix5)
-    # print(matrix10)
-    # print("+" * 10)
-    # print()
-    #
-    # matrix12 = Matrix(3, 3)
-    # matrix12.inverse(matrix5)
-    # print("inverse of matrix5 = matrix12")
-    # print(matrix12)
-    #
-    # matrix14 = Matrix(3, 3)
-    # matrix14.multiplication(matrix5, matrix6)
-    # print("matrix5 * matrix6 = matrix14")
-    # print(matrix14)
-    #
-    # #matrix15 = Matrix(3,3)
-    # matrix15 = matrix14
-    # matrix15.helper_row_addition(0,3)
-    # print("matrix15:")
-    # print(matrix15)
-    matrix101 = Matrix(3, 3)
-    matrix101.setdata([[1, 4,4], [1, 1,10],[4,2,5]])
-    print(f"original matrix:\n {matrix101}\n")
-    matrix101.row_echelon()
-    print(f"reduced matrix:\n {matrix101}")
-    print(matrix101.pivot_variable)
-
-
-    matrix100 = Matrix(2, 2)
-    matrix100.setdata([[50, 1], [50, 1]])
-    print(f"original matrix:\n {matrix100}\n")
-    matrix100.row_echelon()
-    print(f"reduced matrix:\n {matrix100}")
-    print(f"pivot variables: {matrix100.pivot_variable()}")
-
-
-main()
